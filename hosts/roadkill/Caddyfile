@@ -27,12 +27,11 @@ barkeep.roadkill.lan {
 	reverse_proxy metabase:3000
 }
 
-# Open WebUI, staged: this name is served by this host from day one, while the
-# app is still running on the PC. Flip the upstream to openwebui:8080 once the
-# container moves here and joins `edge`; nothing else changes.
+# Open WebUI. The app runs on this host and needs the GPU-backed Ollama that
+# stays on the PC, so `pc.lan:11434` is its one upstream this host does not own.
 openwebui.roadkill.lan {
 	tls internal
-	reverse_proxy pc.lan:8080
+	reverse_proxy openwebui:8080
 }
 
 # The bare host name is the machine, not an app. Send it to the first real

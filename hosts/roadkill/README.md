@@ -25,9 +25,7 @@ resolve and browsers still warn.
 Current sites:
 
 - `barkeep.roadkill.lan` → `metabase:3000`, from the barkeep pipeline.
-- `openwebui.roadkill.lan` → `pc.lan:8080` for now. This is deliberately staged:
-  the name and its certificate arrive before the app moves here, so the cutover
-  is one upstream line, `openwebui:8080`, not a DNS change and a move at once.
+- `openwebui.roadkill.lan` → `openwebui:8080`, the stack in `openwebui/`.
 - `roadkill.lan` → redirect to `barkeep.roadkill.lan`.
 
 To add a service: attach its container to the `edge` network (an external
