@@ -20,6 +20,13 @@ services:
     # upgrade is the last thing it should do.
     image: ghcr.io/tinfoilsh/tinfoil-proxy:0.2.9
     restart: unless-stopped
+    # `-b 0.0.0.0` is required for other containers to reach this one: the
+    # default binds loopback *inside* the container, so Metabase and Open WebUI
+    # would get "connection refused" despite the shared network.
+    # `--allowed-host` pins the Host header this proxy will answer for, so it
+    # must match the service name callers use — `tinfoil` here, not the
+    # `tinfoil-proxy` name the same proxy runs under on the PC.
+    command: ["-b", "0.0.0.0", "--allowed-host", "tinfoil"]
     ports:
       # Loopback only, for `curl http://127.0.0.1:3301/v1/models` while
       # debugging. Metabase uses the edge network, so nothing is exposed to the
