@@ -8,8 +8,17 @@
 # To add a site: attach the service's container to the `edge` network, then add
 # a block like the one below. Nothing else in this host's config changes.
 {
-	# No email: ACME is not used for internal names.
-	admin off
+	# The admin API stays on, on loopback *inside the container*: it is what
+	# `caddy reload` talks to, and reloading is how a Caddyfile edit reaches the
+	# running server without dropping connections. It is not published, so
+	# nothing on the LAN can reach it, and binding loopback keeps it off the
+	# container's own interfaces too (verified: another container gets
+	# "connection refused").
+	#
+	# Do not set `admin off` here. It does not mean "no ACME" — it removes the
+	# endpoint, and every `caddy reload` then fails with
+	# `dial tcp [::1]:2019: connect: connection refused`.
+	admin 127.0.0.1:2019
 }
 
 # Metabase, from the barkeep pipeline.

@@ -42,6 +42,14 @@ changes nothing until that command runs — `docker compose up -d` will not
 recreate a container because a bind-mounted file changed. `reload` is graceful
 and drops no connections; `restart` does.
 
+Reload needs the admin endpoint, which the global block binds to
+`127.0.0.1:2019` inside the container. That is deliberate and safe: it is not
+published, and binding loopback keeps it off the container's own interfaces. If
+someone sets `admin off`, reload fails with `dial tcp [::1]:2019: connect:
+connection refused` and the only way in is `docker compose restart caddy` —
+which is also what you need **once** after changing the `admin` line itself,
+because the old config has to be replaced before the new API exists.
+
 An application stack this host runs lives in a subdirectory (`hosts/roadkill/`
 `<app>/`), with its own `name:` and its own Compose project. An application owned
 by another repository — barkeep — is cloned and run from its own checkout, and
