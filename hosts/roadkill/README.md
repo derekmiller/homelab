@@ -92,3 +92,46 @@ Metabase reaches the Tinfoil proxy at `http://tinfoil:3301/v1` because both join
 `edge`. Because the address is private, Metabase requires
 `MB_LLM_ALLOWED_NETWORKS` to include it — set in the barkeep repository's
 `.env`, not here, since that is where Metabase is configured.
+
+## Open WebUI
+
+`openwebui/` is the chat front-end. It needs no GPU, so it runs here while
+Ollama stays on the PC, where the GPU is. That split is the stack's one runtime
+dependency this host does not own: if the PC is asleep, chat stops. The
+upstream is `http://pc.lan:11434`, set in `openwebui/compose.yaml`.
+
+```bash
+cd /opt/homelab/hosts/roadkill/openwebui
+docker compose up -d
+docker compose ps
+```
+
+It publishes no port. Caddy reaches it as `openwebui:8080` over `edge`.
+
+State lives in the `open-webui` volume, declared with that exact name rather
+than the project-prefixed default, so a project rename cannot orphan it.
+
+**Auth is on.** The first account created at the sign-in page becomes the admin.
+Chats made while auth was off belong to the built-in anonymous user, so they may
+not appear under that account — the rows are still in `webui.db`, and reassigning
+them is a deliberate SQL change against a verified backup, not a default.
+
+### Backups
+
+`openwebui-backup.timer` takes a nightly snapshot at 03:45. It stops the
+container for a few seconds, because SQLite cannot be trusted to a filesystem
+copy while it is being written, then verifies the archive and restarts it.
+
+```bash
+sudo cp /opt/homelab/hosts/roadkill/openwebui/openwebui-backup.service \
+        /opt/homelab/hosts/roadkill/openwebui/openwebui-backup.timer \
+        /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now openwebui-backup.timer
+systemctl list-timers openwebui-backup.timer
+sudo systemctl start openwebui-backup     # once, now
+```
+
+Archives land in `/var/lib/openwebui-backup`, root-owned and mode 0700: every
+chat is in there. A failed run never rotates away the last good copy, and an
+archive without `./webui.db` is treated as a failure rather than a small backup.

@@ -1,0 +1,17 @@
+[Unit]
+Description=Daily Open WebUI data backup
+Documentation=file:/opt/homelab/hosts/roadkill/openwebui/README.md
+
+[Timer]
+# 03:45, after the barkeep database dump at 03:30 and nowhere near the 07:30
+# ingest. The backup stops the container for a few seconds, so it runs while
+# nobody is chatting.
+OnCalendar=*-*-* 03:45:00
+RandomizedDelaySec=15min
+# A host that was off at 03:45 still gets a snapshot on next boot. It is a
+# snapshot, not a delta, so running late is fine.
+Persistent=true
+Unit=openwebui-backup.service
+
+[Install]
+WantedBy=timers.target

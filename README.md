@@ -20,6 +20,11 @@ hosts/
     Caddyfile          # every site served from this host
     compose.tinfoil.yaml
     README.md          # what runs here, and the addresses it answers on
+    openwebui/         # chat front-end; Ollama stays on the PC
+      compose.yaml
+      backup.sh
+      openwebui-backup.service
+      openwebui-backup.timer
 scripts/
   check.sh             # validate every Caddyfile and Compose file, start nothing
 ```

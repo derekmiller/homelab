@@ -1,0 +1,50 @@
+# Open WebUI: the chat front-end for models that run somewhere else.
+#
+# It lives on this host because it needs no GPU. Ollama stays on the PC, where
+# the GPU is, so this stack has one runtime dependency it does not own: if the
+# PC is off or asleep, chat stops. That is a deliberate split, not an oversight.
+#
+#   docker compose up -d
+#
+# Reachable only through the proxy: Caddy resolves `openwebui:8080` over the
+# shared `edge` network, and this file publishes no port at all.
+name: openwebui
+
+services:
+  openwebui:
+    # Pinned to the version already running on the PC, because the database has
+    # been migrated forward to it. `main` is an unattended schema migration on a
+    # host nobody watches, and a downgrade against a migrated database is worse.
+    image: ghcr.io/open-webui/open-webui:v0.13.4
+    restart: unless-stopped
+    environment:
+      # Auth was off on the PC. It is on here: the first account created at the
+      # sign-in page becomes the admin. Existing chats belong to the built-in
+      # anonymous user, so they are not automatically visible to that account —
+      # check before assuming, and see README.md.
+      WEBUI_AUTH: "True"
+      # Links and redirects the app generates must name the proxy, not
+      # localhost:8080, or they point at a port nothing publishes.
+      WEBUI_URL: https://openwebui.roadkill.lan
+      # The GPU is on the PC. This is the LAN hop the split creates.
+      OLLAMA_BASE_URL: http://pc.lan:11434
+    volumes:
+      # The volume keeps the name it had on the PC, where the Compose file
+      # declared it `external: true`. Restoring the migration tarball into a
+      # volume by this name is the whole data move.
+      - open-webui:/app/backend/data
+    networks:
+      - default
+      - edge
+
+volumes:
+  open-webui:
+    # Declared, not external: Compose creates it if absent, but never renames
+    # it. A project rename would otherwise orphan the chats into a new empty
+    # volume that looks like data loss.
+    name: open-webui
+
+networks:
+  edge:
+    external: true
+    name: edge

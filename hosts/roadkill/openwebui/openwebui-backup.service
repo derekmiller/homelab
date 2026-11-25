@@ -1,0 +1,22 @@
+[Unit]
+Description=Back up the Open WebUI data volume
+Documentation=file:/opt/homelab/hosts/roadkill/openwebui/README.md
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+SyslogIdentifier=openwebui-backup
+WorkingDirectory=/opt/homelab/hosts/roadkill/openwebui
+Environment=PATH=/usr/local/bin:/usr/bin:/bin:/snap/bin
+# systemd creates /var/lib/openwebui-backup owned by root, mode 0700: the
+# archive contains every chat, so it is not world-readable.
+StateDirectory=openwebui-backup
+StateDirectoryMode=0700
+# Optional overrides: OPENWEBUI_BACKUP_KEEP, OPENWEBUI_BACKUP_REMOTE.
+EnvironmentFile=-/etc/openwebui/backup.env
+ExecStart=/usr/bin/env bash /opt/homelab/hosts/roadkill/openwebui/backup.sh
+TimeoutStartSec=15min
+NoNewPrivileges=true
+PrivateTmp=true
