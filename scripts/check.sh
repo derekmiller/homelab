@@ -5,7 +5,8 @@
 #   ./scripts/check.sh
 #
 # Per host directory:
-#   1. Every compose*.yaml renders (docker compose config).
+#   1. Every compose*.yaml under it renders (docker compose config). App stacks
+#      live in subdirectories of the host that runs them, so this is recursive.
 #   2. Every compose file declares a top-level `name:` literally, and Compose
 #      agrees with it. Compose derives a name from the directory when none is
 #      given, which is why the file is read directly: the derived value would
@@ -13,9 +14,9 @@
 #      for the proxy that volume is the local CA — losing the explicit name
 #      means a new CA and a new trust ceremony on every device.
 #   3. No two projects in this repo claim the same name.
-#   4. `caddy validate` accepts the Caddyfile, in the image the host pins. A
-#      broken Caddyfile takes down every site on the host at once, so this is
-#      the check worth having before `up -d`.
+#   4. `caddy validate` accepts the host's Caddyfile, in the image the host
+#      pins. A broken Caddyfile takes down every site on the host at once, so
+#      this is the check worth having before `up -d`.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -36,9 +37,8 @@ for dir in hosts/*/; do
     fail=1
   fi
 
-  for file in "$dir"/compose*.yaml; do
-    [ -e "$file" ] || continue
-
+  # Sorted so the output is stable across filesystems; nested stacks included.
+  while IFS= read -r file; do
     if ! rendered=$(docker compose -f "$file" config --format json 2>&1); then
       echo "FAIL $file: does not render"
       echo "$rendered" | sed 's/^/    /'
@@ -61,7 +61,7 @@ for dir in hosts/*/; do
     else
       seen_names[$declared]=$file
     fi
-  done
+  done < <(find "$dir" -name 'compose*.yaml' -type f | sort)
 
   # Validate the Caddyfile with the caddy image this host actually pins, so the
   # check cannot pass on a version the host does not run.

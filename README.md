@@ -3,10 +3,15 @@
 Host configuration for the machines on this LAN: what runs, how it is reached,
 and what has to be true for it to keep working.
 
-This repo is the **source of truth for the hosts**, not for the applications they
-run. Application repositories stay separate and own their own Compose projects;
-this one owns the shared substrate — DNS names, TLS, the reverse proxy, and the
-networks that let separate projects find each other.
+This repo is the **source of truth for the hosts**: what runs, how it is reached,
+and the substrate that makes it reachable — DNS names, TLS, the reverse proxy,
+and the networks that let separate Compose projects find each other.
+
+Application stacks live here too, in the directory of the host that runs them
+(`hosts/roadkill/<app>/`), because a stack *is* host configuration: a volume, a
+network, a port. An application with its own release cadence, CI, or contributors
+keeps its own repository and joins `edge` from there — barkeep is the example,
+and this repo only needs the name it answers on.
 
 ```
 hosts/

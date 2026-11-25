@@ -25,12 +25,27 @@ resolve and browsers still warn.
 Current sites:
 
 - `barkeep.roadkill.lan` → `metabase:3000`, from the barkeep pipeline.
+- `openwebui.roadkill.lan` → `pc.lan:8080` for now. This is deliberately staged:
+  the name and its certificate arrive before the app moves here, so the cutover
+  is one upstream line, `openwebui:8080`, not a DNS change and a move at once.
 - `roadkill.lan` → redirect to `barkeep.roadkill.lan`.
 
 To add a service: attach its container to the `edge` network (an external
-network in its own Compose file), add a site block to `Caddyfile`, then
-`docker compose up -d` here — Caddy reloads the file without dropping
-connections.
+network in its own Compose file), add a site block to `Caddyfile`, then reload:
+
+```bash
+docker compose exec caddy caddy reload --config /etc/caddy/Caddyfile
+```
+
+The image runs `caddy run` **without `--watch`**, so editing the Caddyfile
+changes nothing until that command runs — `docker compose up -d` will not
+recreate a container because a bind-mounted file changed. `reload` is graceful
+and drops no connections; `restart` does.
+
+An application stack this host runs lives in a subdirectory (`hosts/roadkill/`
+`<app>/`), with its own `name:` and its own Compose project. An application owned
+by another repository — barkeep — is cloned and run from its own checkout, and
+this directory only needs the name it answers on.
 
 ## Deploying and updating
 
