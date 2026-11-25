@@ -1,0 +1,26 @@
+# Routing for roadkill. Names resolve through Pi-hole's local DNS records: one A
+# record per site, all pointing at 192.168.0.231.
+#
+# `tls internal` means Caddy's own CA, so each client needs the root certificate
+# installed once (see the repo README). If a public domain ever points here,
+# replace `tls internal` with a DNS-01 challenge and the trust step disappears.
+#
+# To add a site: attach the service's container to the `edge` network, then add
+# a block like the one below. Nothing else in this host's config changes.
+{
+	# No email: ACME is not used for internal names.
+	admin off
+}
+
+# Metabase, from the barkeep pipeline.
+barkeep.roadkill.lan {
+	tls internal
+	reverse_proxy metabase:3000
+}
+
+# The bare host name is the machine, not an app. Send it to the first real
+# service; replace this with a landing page once there are several.
+roadkill.lan {
+	tls internal
+	redir https://barkeep.roadkill.lan{uri}
+}

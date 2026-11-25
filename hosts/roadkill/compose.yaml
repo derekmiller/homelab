@@ -1,0 +1,36 @@
+# Caddy: TLS termination and routing for every service on this host.
+#
+# `name:` is load-bearing. The Compose project name decides volume names, and
+# `caddy_data` holds Caddy's local CA — the root certificate every device on the
+# LAN trusts. Renaming the project silently creates a new CA, and every browser
+# starts reporting ERR_CERT_AUTHORITY_INVALID.
+name: edge
+
+services:
+  caddy:
+    # Pinned to the patch release, not `2-alpine`: a proxy in front of every
+    # site should not change itself on the day a host happens to pull.
+    image: caddy:2.11.9-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"    # HTTP/3
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - edge
+
+networks:
+  edge:
+    # Shared with the other Compose projects on this host. External so it
+    # survives `docker compose down`, and so a project can join it without
+    # knowing anything about this file.
+    external: true
+    name: edge
+
+volumes:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,8 @@
+# Caddy's root certificate, extracted to install in client trust stores. It is
+# a public certificate, not a secret, but it belongs to one CA on one host and
+# has no business in history.
+caddy-root.crt
+
+# Local overrides, if one is ever needed. Tracked config should not need it.
+.env
+.env.*

@@ -1,0 +1,16 @@
+name: check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Docker Compose v2 ships on the runner; the pinned Caddy image is pulled
+      # on first run by `docker run` in the script itself.
+      - name: Validate Compose files and Caddyfiles
+        run: ./scripts/check.sh
