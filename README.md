@@ -36,6 +36,7 @@ missing.
 On the host:
 
 ```bash
+sudo mkdir -p /opt/homelab && sudo chown "$USER": /opt/homelab
 git clone git@github.com:derekmiller/homelab.git /opt/homelab
 cd /opt/homelab/hosts/roadkill
 docker compose up -d

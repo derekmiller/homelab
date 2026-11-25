@@ -35,10 +35,15 @@ connections.
 ## Deploying and updating
 
 ```bash
+sudo mkdir -p /opt/homelab && sudo chown "$USER": /opt/homelab
 git clone git@github.com:derekmiller/homelab.git /opt/homelab
 cd /opt/homelab/hosts/roadkill
 docker compose up -d
 ```
+
+`/opt` is root-owned. This directory has to belong to the user who runs Compose:
+the Caddyfile is bind-mounted from this checkout, and a root-owned tree means
+running Compose with `sudo` from then on.
 
 ```bash
 cd /opt/homelab && git pull && cd hosts/roadkill && docker compose up -d
