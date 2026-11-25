@@ -33,11 +33,14 @@ missing.
 
 ## Deploying
 
+This repo is public, and the host only ever reads it, so deploy over HTTPS and
+give the host no GitHub credentials at all. Pushing stays a workstation concern.
+
 On the host:
 
 ```bash
 sudo mkdir -p /opt/homelab && sudo chown "$USER": /opt/homelab
-git clone git@github.com:derekmiller/homelab.git /opt/homelab
+git clone https://github.com/derekmiller/homelab.git /opt/homelab
 cd /opt/homelab/hosts/roadkill
 docker compose up -d
 ```
@@ -59,7 +62,7 @@ than replaced:
 cd /path/to/old/stack
 docker compose down                               # never -v
 docker volume ls | grep caddy_data                # edge_caddy_data
-git clone git@github.com:derekmiller/homelab.git /opt/homelab
+git clone https://github.com/derekmiller/homelab.git /opt/homelab
 cd /opt/homelab/hosts/roadkill && docker compose up -d
 docker volume ls | grep caddy_data                # same volume, new directory
 ```
