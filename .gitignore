@@ -6,3 +6,7 @@ caddy-root.crt
 # Local overrides, if one is ever needed. Tracked config should not need it.
 .env
 .env.*
+
+# Caddy internal CA private key — never commit
+*.key
+root.key
