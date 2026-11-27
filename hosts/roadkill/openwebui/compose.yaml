@@ -15,14 +15,14 @@ services:
     # Pinned to the version already running on the PC, because the database has
     # been migrated forward to it. `main` is an unattended schema migration on a
     # host nobody watches, and a downgrade against a migrated database is worse.
-    image: ghcr.io/open-webui/open-webui:v0.13.4
+    image: ghcr.io/open-webui/open-webui:v0.13.5
     restart: unless-stopped
     environment:
       # Auth was off on the PC. It is on here: the first account created at the
       # sign-in page becomes the admin. Existing chats belong to the built-in
       # anonymous user, so they are not automatically visible to that account —
       # check before assuming, and see README.md.
-      WEBUI_AUTH: "True"
+      WEBUI_AUTH: "False"
       # Links and redirects the app generates must name the proxy, not
       # localhost:8080, or they point at a port nothing publishes.
       WEBUI_URL: https://openwebui.roadkill.lan
